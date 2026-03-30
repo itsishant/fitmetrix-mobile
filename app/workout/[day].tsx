@@ -13,11 +13,17 @@ import { Colors } from "../../constants/theme";
 import { getWorkoutByDay } from "../../constants/workouts";
 import { DayWorkout, Exercise } from "../../types";
 
+const FALLBACK_WORKOUT_IMAGE =
+  "https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg?auto=compress&cs=tinysrgb&w=1200";
+
 export default function DayWorkoutScreen() {
   const { day } = useLocalSearchParams<{ day: string }>();
   const navigation = useNavigation();
   const [workout, setWorkout] = useState<DayWorkout | null>(null);
   const [completedExercises, setCompletedExercises] = useState<Set<string>>(
+    new Set(),
+  );
+  const [imageFallbackIds, setImageFallbackIds] = useState<Set<string>>(
     new Set(),
   );
 
@@ -38,6 +44,15 @@ export default function DayWorkoutScreen() {
         newSet.add(exerciseId);
       }
       return newSet;
+    });
+  };
+
+  const onExerciseImageError = (exerciseId: string) => {
+    setImageFallbackIds((prev) => {
+      if (prev.has(exerciseId)) return prev;
+      const next = new Set(prev);
+      next.add(exerciseId);
+      return next;
     });
   };
 
@@ -80,9 +95,14 @@ export default function DayWorkoutScreen() {
               isCompleted && styles.exerciseCardCompleted,
             ]}>
             <Image
-              source={{ uri: exercise.image }}
+              source={{
+                uri: imageFallbackIds.has(exercise.id)
+                  ? FALLBACK_WORKOUT_IMAGE
+                  : exercise.image,
+              }}
               style={styles.exerciseImage}
               resizeMode="cover"
+              onError={() => onExerciseImageError(exercise.id)}
             />
             <View style={styles.exerciseContent}>
               <View style={styles.exerciseHeader}>

@@ -1,53 +1,34 @@
 import { DayWorkout } from "../types";
 
+const pexels = (id: string) =>
+  `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=1200`;
+
 const IMG = {
-  benchPress:
-    "https://i.pinimg.com/originals/89/99/c2/8999c26a58939e04c515b6eb2811e972.gif",
-  inclinePress:
-    "https://i.pinimg.com/originals/79/fc/b4/79fcb42a0bc10816392f6d2ec84317bd.gif",
-  cableFly:
-    "https://i.pinimg.com/originals/3c/00/b9/3c00b9b4c3c73f2fccbf04ef36a6cfd3.gif",
-  ropePushdown:
-    "https://i.pinimg.com/originals/4b/3b/fc/4b3bfc6b207bf61cdd0d7786ebbfbaf7.gif",
-  overheadExtension:
-    "https://i.pinimg.com/originals/3b/cd/47/3bcd4700bfa8e0fd4eee4b1ca2d3c4c8.gif",
-  dips: "https://i.pinimg.com/originals/c6/d9/c1/c6d9c10f22c64d0fb98d58d3bf8b9a8d.gif",
-  latPulldown:
-    "https://i.pinimg.com/originals/5f/94/dc/5f94dcede8fa403bd85ddb63b16ccadc.gif",
-  seatedRow:
-    "https://i.pinimg.com/originals/89/0c/c9/890cc9a7df1d00e4c3e30d5a68f64f05.gif",
-  dbRow:
-    "https://i.pinimg.com/originals/f1/20/c7/f120c761fec63509d4dc5e76a8556e46.gif",
-  barbellCurl:
-    "https://i.pinimg.com/originals/29/18/21/291821f42bb31c28f98f00da3a5d3050.gif",
-  hammerCurl:
-    "https://i.pinimg.com/originals/d2/95/c1/d295c1eaae2eaef219e9a56c4cd6206b.gif",
-  squat:
-    "https://i.pinimg.com/originals/ae/2b/a0/ae2ba0a1a5b4f95a1a9ece92c0c1eddb.gif",
-  legCurl:
-    "https://i.pinimg.com/originals/80/ee/ef/80eeef8cd101d9161e028d8f7b89d034.gif",
-  legExtension:
-    "https://i.pinimg.com/originals/8f/b4/d6/8fb4d6ac4a4ec7c7ff7dc0b0ae3e2fcd.gif",
-  calfRaise:
-    "https://i.pinimg.com/originals/d5/cd/39/d5cd39a920a1e34eebb2e7c95ca40e35.gif",
-  hangingLegRaise:
-    "https://i.pinimg.com/originals/25/93/7b/25937be8c40d3db1288c74e9d7788b3d.gif",
-  cableCrunch:
-    "https://i.pinimg.com/originals/31/10/da/3110da6a3c05e8ded12a4c25f932dcfe.gif",
-  shoulderPress:
-    "https://i.pinimg.com/originals/77/ca/76/77ca768dd82f68bbef8a7b7b70c94d38.gif",
-  lateralRaise:
-    "https://i.pinimg.com/originals/ae/94/97/ae9497c30bbe0a76f11e5e93a4f97523.gif",
-  rearDeltFly:
-    "https://i.pinimg.com/originals/a3/d6/29/a3d6296d4f47e2edcc50f5c2afd02821.gif",
-  skullCrusher:
-    "https://i.pinimg.com/originals/f8/68/16/f86816d6fe3a0772b92a08e1a7e9f919.gif",
-  lunges:
-    "https://i.pinimg.com/originals/db/68/e0/db68e00e7d1c2f7c1f62a27f6bfee7ed.gif",
-  plank:
-    "https://i.pinimg.com/originals/8b/b8/6c/8bb86c0d09deee45ff9fe66c1f3b838c.gif",
-  russianTwist:
-    "https://i.pinimg.com/originals/b0/f1/f6/b0f1f60fb08df6a47b4dc87d3ec71614.gif",
+  benchPress: pexels("3837781"),
+  inclinePress: pexels("34651540"),
+  cableFly: pexels("7289250"),
+  ropePushdown: pexels("6243176"),
+  overheadExtension: pexels("13616289"),
+  dips: pexels("4803875"),
+  latPulldown: pexels("18060085"),
+  seatedRow: pexels("4162482"),
+  dbRow: pexels("34043599"),
+  barbellCurl: pexels("9073246"),
+  inclineDbCurl: pexels("29526383"),
+  hammerCurl: pexels("6455960"),
+  squat: pexels("1552106"),
+  legCurl: pexels("28731788"),
+  legExtension: pexels("19722966"),
+  calfRaise: pexels("13965339"),
+  hangingLegRaise: pexels("4803688"),
+  cableCrunch: pexels("4720528"),
+  shoulderPress: pexels("7289367"),
+  lateralRaise: pexels("29793977"),
+  rearDeltFly: pexels("29865137"),
+  skullCrusher: pexels("5496589"),
+  lunges: pexels("6339676"),
+  plank: pexels("6285204"),
+  russianTwist: pexels("5128466"),
 };
 
 export const WORKOUT_DATA: DayWorkout[] = [
@@ -146,7 +127,7 @@ export const WORKOUT_DATA: DayWorkout[] = [
         name: "Incline DB Curl",
         sets: 3,
         reps: "12",
-        image: IMG.hammerCurl,
+        image: IMG.inclineDbCurl,
         description: "Incline bench dumbbell curl.",
       },
       {

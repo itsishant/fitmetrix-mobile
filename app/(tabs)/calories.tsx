@@ -21,12 +21,27 @@ import {
     getTodayDate,
     getUserProfile,
     removeFoodEntry,
+    saveUserProfile,
 } from "../../utils/storage";
+
+const DEFAULT_PROFILE: UserProfile = {
+  name: "User",
+  age: 25,
+  weight: 70,
+  height: 170,
+  gender: "male",
+  activityLevel: "moderate",
+  goal: "maintain",
+  dailyCalorieGoal: 2000,
+  dailyWaterGoal: 2500,
+};
 
 export default function CaloriesScreen() {
   const [dailyLog, setDailyLog] = useState<DailyLog | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [goalModalVisible, setGoalModalVisible] = useState(false);
+  const [calorieGoalInput, setCalorieGoalInput] = useState("");
   const [foodName, setFoodName] = useState("");
   const [foodCalories, setFoodCalories] = useState("");
   const [mealType, setMealType] = useState<FoodEntry["mealType"]>("breakfast");
@@ -85,6 +100,32 @@ export default function CaloriesScreen() {
         },
       },
     ]);
+  };
+
+  const openCalorieGoalEditor = () => {
+    setCalorieGoalInput(String(calorieGoal));
+    setGoalModalVisible(true);
+  };
+
+  const handleSaveCalorieGoal = async () => {
+    const parsedGoal = parseInt(calorieGoalInput, 10);
+    if (isNaN(parsedGoal) || parsedGoal < 800 || parsedGoal > 8000) {
+      Alert.alert(
+        "Invalid Goal",
+        "Enter a calorie goal between 800 and 8000 calories.",
+      );
+      return;
+    }
+
+    const baseProfile = profile ?? DEFAULT_PROFILE;
+    const updatedProfile: UserProfile = {
+      ...baseProfile,
+      dailyCalorieGoal: parsedGoal,
+    };
+
+    await saveUserProfile(updatedProfile);
+    setProfile(updatedProfile);
+    setGoalModalVisible(false);
   };
 
   const calorieGoal = profile?.dailyCalorieGoal || 2000;
@@ -174,6 +215,13 @@ export default function CaloriesScreen() {
             </View>
           </View>
         </View>
+
+        <TouchableOpacity
+          onPress={openCalorieGoalEditor}
+          style={styles.goalButton}>
+          <Ionicons name="create-outline" size={20} color={Colors.text} />
+          <Text style={styles.goalButtonText}>Set Calorie Goal</Text>
+        </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => setModalVisible(true)}
@@ -294,6 +342,39 @@ export default function CaloriesScreen() {
           </View>
         </View>
       </Modal>
+
+      <Modal
+        visible={goalModalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setGoalModalVisible(false)}>
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Set Calorie Goal</Text>
+              <TouchableOpacity onPress={() => setGoalModalVisible(false)}>
+                <Ionicons name="close" size={28} color={Colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.inputLabel}>Daily Goal (calories)</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="e.g. 2400"
+              placeholderTextColor={Colors.textSecondary}
+              keyboardType="numeric"
+              value={calorieGoalInput}
+              onChangeText={setCalorieGoalInput}
+            />
+
+            <TouchableOpacity
+              onPress={handleSaveCalorieGoal}
+              style={styles.submitButton}>
+              <Text style={styles.submitButtonText}>Save Goal</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -382,6 +463,23 @@ const styles = StyleSheet.create({
   statLabel: {
     color: Colors.textSecondary,
     fontSize: 14,
+  },
+  goalButton: {
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    paddingVertical: 14,
+    marginTop: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: Colors.primary,
+  },
+  goalButtonText: {
+    color: Colors.text,
+    fontSize: 16,
+    fontWeight: "700",
+    marginLeft: 8,
   },
   addButton: {
     backgroundColor: Colors.primary,

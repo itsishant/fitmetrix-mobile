@@ -2,9 +2,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import {
+    Alert,
+    Modal,
     ScrollView,
     StyleSheet,
     Text,
+    TextInput,
     TouchableOpacity,
     View,
 } from "react-native";
@@ -17,6 +20,7 @@ import {
     getDailyLog,
     getTodayDate,
     getUserProfile,
+    saveUserProfile,
 } from "../../utils/storage";
 
 const WATER_AMOUNTS = [
@@ -26,9 +30,23 @@ const WATER_AMOUNTS = [
   { amount: 1000, label: "1 Liter", icon: "💧" },
 ];
 
+const DEFAULT_PROFILE: UserProfile = {
+  name: "User",
+  age: 25,
+  weight: 70,
+  height: 170,
+  gender: "male",
+  activityLevel: "moderate",
+  goal: "maintain",
+  dailyCalorieGoal: 2000,
+  dailyWaterGoal: 2500,
+};
+
 export default function WaterScreen() {
   const [dailyLog, setDailyLog] = useState<DailyLog | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [goalModalVisible, setGoalModalVisible] = useState(false);
+  const [waterGoalInput, setWaterGoalInput] = useState("");
 
   const loadData = async () => {
     const today = getTodayDate();
@@ -66,6 +84,32 @@ export default function WaterScreen() {
   const remaining = Math.max(waterGoal - currentWater, 0);
   const glassesRemaining = Math.ceil(remaining / 250);
 
+  const openWaterGoalEditor = () => {
+    setWaterGoalInput(String(waterGoal));
+    setGoalModalVisible(true);
+  };
+
+  const handleSaveWaterGoal = async () => {
+    const parsedGoal = parseInt(waterGoalInput, 10);
+    if (isNaN(parsedGoal) || parsedGoal < 500 || parsedGoal > 6000) {
+      Alert.alert(
+        "Invalid Goal",
+        "Enter a water goal between 500 and 6000 ml.",
+      );
+      return;
+    }
+
+    const baseProfile = profile ?? DEFAULT_PROFILE;
+    const updatedProfile: UserProfile = {
+      ...baseProfile,
+      dailyWaterGoal: parsedGoal,
+    };
+
+    await saveUserProfile(updatedProfile);
+    setProfile(updatedProfile);
+    setGoalModalVisible(false);
+  };
+
   const getTimeOfDay = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "morning";
@@ -92,6 +136,19 @@ export default function WaterScreen() {
         </View>
 
         <View style={styles.summaryCard}>
+          <View style={styles.goalRow}>
+            <View>
+              <Text style={styles.goalLabel}>Daily Goal</Text>
+              <Text style={styles.goalValue}>{waterGoal} ml</Text>
+            </View>
+            <TouchableOpacity
+              onPress={openWaterGoalEditor}
+              style={styles.goalButton}>
+              <Ionicons name="create-outline" size={16} color={Colors.text} />
+              <Text style={styles.goalButtonText}>Set Goal</Text>
+            </TouchableOpacity>
+          </View>
+
           <View style={styles.centeredRow}>
             <View style={styles.waterCircle}>
               <View
@@ -194,6 +251,39 @@ export default function WaterScreen() {
           </Text>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={goalModalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setGoalModalVisible(false)}>
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Set Water Goal</Text>
+              <TouchableOpacity onPress={() => setGoalModalVisible(false)}>
+                <Ionicons name="close" size={28} color={Colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.inputLabel}>Daily Goal (ml)</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="e.g. 3000"
+              placeholderTextColor={Colors.textSecondary}
+              keyboardType="numeric"
+              value={waterGoalInput}
+              onChangeText={setWaterGoalInput}
+            />
+
+            <TouchableOpacity
+              onPress={handleSaveWaterGoal}
+              style={styles.submitButton}>
+              <Text style={styles.submitButtonText}>Save Goal</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -229,6 +319,36 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     marginTop: 16,
+  },
+  goalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  goalLabel: {
+    color: Colors.textSecondary,
+    fontSize: 12,
+    textTransform: "uppercase",
+  },
+  goalValue: {
+    color: Colors.text,
+    fontSize: 22,
+    fontWeight: "700",
+    marginTop: 4,
+  },
+  goalButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.primary,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  goalButtonText: {
+    color: Colors.text,
+    fontWeight: "600",
+    marginLeft: 6,
   },
   centeredRow: {
     alignItems: "center",
@@ -401,5 +521,50 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     fontSize: 12,
     lineHeight: 20,
+  },
+  modalBackdrop: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  modalTitle: {
+    color: Colors.text,
+    fontSize: 24,
+    fontWeight: "700",
+  },
+  inputLabel: {
+    color: Colors.text,
+    fontWeight: "600",
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: Colors.card,
+    color: Colors.text,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  submitButton: {
+    backgroundColor: Colors.primary,
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  submitButtonText: {
+    color: Colors.text,
+    fontWeight: "700",
+    fontSize: 18,
   },
 });
